@@ -47,6 +47,11 @@ int main(int argc, char **args) {
       .help("No of sample runs for each kernel for aggregation")
       .default_value(8);
 
+  program.add_argument("--sample-metrics")
+      .help("List of metrics to be collected for sample runs")
+      .default_value(std::vector<std::string>(
+          {"seconds", "cycles", "instructions", "cache-misses"}));
+
   program.add_argument("--output-logs")
       .help("Enables output logs for each kernel run")
       .default_value(false);
@@ -77,14 +82,14 @@ int main(int argc, char **args) {
   // For now, the torch and llvm setup are being built into the same build, so
   // seperation at the interface level can be skipped for now
   std::string buildPath = program.get<std::string>("--build-path");
+  std::vector<std::string> perf_metrics =
+      program.get<std::vector<std::string>>("--sample-metrics");
   // std::string pipelineJsonPath = program.get<std::string>("--pipeline");
   std::string pipelineJsonPath = "pipeline.json";
 
   std::string outputFolderPath = program.get<std::string>("--output-dir");
 
-  // unsigned int sample_run_count = program.get<unsigned
-  // int>("--sample-count");
-  unsigned int sample_run_count = 8;
+  unsigned int sample_run_count = program.get<unsigned int>("--sample-count");
   std::string compiler_path = program.get<std::string>("--cc");
   std::string model_file = program.get<std::string>("model-file");
 
@@ -95,6 +100,7 @@ int main(int argc, char **args) {
   CommandManager::set_output_folder(outputFolderPath);
   CommandManager::set_pipeline_json_filepath(pipelineJsonPath);
   CommandManager::set_perf_sample_run_count(sample_run_count);
+  CommandManager::set_perf_metrics(perf_metrics);
   CommandManager::initialise_environment();
 
   std::cout << "Pipeline path: " << pipelineJsonPath << std::endl;
