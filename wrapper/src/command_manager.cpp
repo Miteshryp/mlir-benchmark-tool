@@ -640,7 +640,7 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
   if (status != FFI_OK) {
     std::cerr << "Failed to prepare kernel call: " << std::endl;
     dlclose(fHandle);
-    return;
+    return std::vector<std::map<std::string, double>>();
   }
 
   MemRefArg return_arg_data(returnArgObject);
@@ -677,14 +677,14 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
 
     // Collect Timing Metrics
     // Write individual run to csv
-    std::ifstream perf_stream(ll_object_filepath.generic_string() + "." +
-                              std::string(i) + ".metric");
+    std::ofstream perf_stream(ll_object_filepath.generic_string() + "." +
+                              std::to_string(i) + ".metric");
     perf_stream << result.to_csv();
     perf_stream.close();
 
     // We dont need to check if the key is in the perf_metrics vector since that
     // vector is what was used to initialise the perf_counter
-    std::map run_result_map(result.begin(), result.end());
+    std::map<std::string, double> run_result_map(result.begin(), result.end());
     collected_metrics.push_back(run_result_map);
   }
 
