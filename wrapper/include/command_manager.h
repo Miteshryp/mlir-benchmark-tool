@@ -34,7 +34,8 @@ class CommandManager {
   static fs::path loweringFolder;
   static bool enableLogFiles;
   static bool enableRunLogs;
-  static perf::EventCounter perf_event_counter;
+  // static perf::EventCounter perf_event_counter;
+  static unsigned int perf_run_count;
 
   static fs::path torch_mlir_install_path;
   static fs::path llvm_install_path;
@@ -63,6 +64,7 @@ public:
   static void set_perf_metrics(const std::vector<std::string> &metrics);
   static void set_pass_log_flag(bool flag);
   static void set_run_log_flag(bool flag);
+  static void set_perf_sample_run_count(const unsigned int &count);
 
   static void set_output_folder(const fs::path &output);
   static void set_pipeline_json_filepath(const fs::path &filepath);

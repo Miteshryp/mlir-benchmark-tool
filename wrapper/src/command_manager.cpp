@@ -34,7 +34,7 @@ namespace fs = std::filesystem;
 ffi_type *create_memref_struct_type(int rank);
 void destroy_memref_struct_type(ffi_type *memref_type);
 
-perf::EventCounter CommandManager::perf_event_counter = perf::EventCounter{};
+// perf::EventCounter CommandManager::perf_event_counter = perf::EventCounter{};
 fs::path CommandManager::torch_mlir_install_path;
 
 fs::path CommandManager::torch_opt_exec;
@@ -52,6 +52,7 @@ bool CommandManager::enableLogFiles = false;
 bool CommandManager::enableRunLogs = false;
 
 std::vector<std::string> CommandManager::perf_metrics;
+unsigned int CommandManager::perf_run_count;
 
 /*
  * Execute a command on the system's command line
@@ -88,7 +89,7 @@ void CommandManager::initialise_environment() {
 
   // CommandManager::perf_event_counter.add(
   //     {"seconds", "instructions", "cycles", "cache-misses"});
-  CommandManager::perf_event_counter.add(CommandManager::perf_metrics);
+  // CommandManager::perf_event_counter.add(CommandManager::perf_metrics);
 }
 
 std::map<std::string, double> CommandManager::aggregate_metrics(
@@ -127,6 +128,7 @@ bool CommandManager::verifyParameters() {
   assert(CommandManager::outputFolder.generic_string().size() > 0);
   assert(CommandManager::compiler.size() > 0);
   assert(CommandManager::perf_metrics.size() > 0);
+  assert(CommandManager::perf_run_count > 0);
 
   // Derivative variables
   assert(CommandManager::llvm_lib_path.generic_string().size() > 0);
@@ -143,6 +145,10 @@ void CommandManager::set_pass_log_flag(bool flag) {
 }
 void CommandManager::set_run_log_flag(bool flag) {
   CommandManager::enableRunLogs = flag;
+}
+
+void CommandManager::set_perf_sample_run_count(const unsigned int &count) {
+  CommandManager::perf_run_count = count;
 }
 
 void CommandManager::set_compiler_executable(const fs::path &binary) {
@@ -573,7 +579,7 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
               << fs::path(ll_object_filepath).replace_extension().filename()
               << std::endl;
     dlclose(fHandle);
-    return;
+    return std::vector<std::map<std::string, double>>();
   }
 
   //  Prepare the argument type list and data array to call the function
@@ -667,7 +673,7 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
              func_arg_data.data());
     perf_event_counter.stop();
 
-    auto result = perf_event.result();
+    auto result = perf_event_counter.result();
 
     // Collect Timing Metrics
     // Write individual run to csv

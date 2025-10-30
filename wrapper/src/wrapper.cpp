@@ -43,6 +43,10 @@ int main(int argc, char **args) {
       .help("Enables Pass lowering output in temp folder")
       .default_value(false);
 
+  program.add_argument("--sample-count")
+      .help("No of sample runs for each kernel for aggregation")
+      .default_value(8);
+
   program.add_argument("--output-logs")
       .help("Enables output logs for each kernel run")
       .default_value(false);
@@ -78,6 +82,7 @@ int main(int argc, char **args) {
 
   std::string outputFolderPath = program.get<std::string>("--output-dir");
 
+  unsigned int sample_run_count = program.get<unsigned int>("--sample-count");
   std::string compiler_path = program.get<std::string>("--cc");
   std::string model_file = program.get<std::string>("model-file");
 
@@ -87,6 +92,7 @@ int main(int argc, char **args) {
   CommandManager::set_compiler_executable(compiler_path);
   CommandManager::set_output_folder(outputFolderPath);
   CommandManager::set_pipeline_json_filepath(pipelineJsonPath);
+  CommandManager::set_perf_sample_run_count(sample_run_count);
   CommandManager::initialise_environment();
 
   std::cout << "Pipeline path: " << pipelineJsonPath << std::endl;
