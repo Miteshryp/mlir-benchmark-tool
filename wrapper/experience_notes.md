@@ -1,0 +1,1 @@
+- For some reason, passing -L(library_path) and the -l(dep_lib) before passing in the input file was not working for compilation. Why was this? 

@@ -1,0 +1,17 @@
+{
+  "pass": [
+    "canonicalize",
+"cse",
+"allow-unregistered-dialect",
+"one-shot-bufferize=\"bufferize-function-boundaries\"",
+"convert-linalg-to-loops",
+"convert-scf-to-cf",
+"lower-affine",
+"expand-strided-metadata",
+"finalize-memref-to-llvm",
+"convert-arith-to-llvm",
+"convert-func-to-llvm",
+"convert-cf-to-llvm",
+"reconcile-unrealized-casts"
+  ]
+}

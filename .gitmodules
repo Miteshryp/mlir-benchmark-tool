@@ -1,0 +1,7 @@
+[submodule "torch-mlir"]
+	path = torch-mlir
+	url = https://github.com/Miteshryp/torch-mlir.git
+	branch = cs6886
+[submodule "wrapper/ext/perf-cpp"]
+	path = wrapper/ext/perf-cpp
+	url = https://github.com/jmuehlig/perf-cpp
