@@ -180,7 +180,7 @@ void CommandManager::set_torch_install_path(const fs::path &path) {
 }
 
 void CommandManager::set_perf_metrics(const std::vector<std::string> &metrics) {
-  CommandManager::perf_metrics = perf_metrics;
+  CommandManager::perf_metrics = metrics;
 }
 /*
  *
