@@ -1,1 +1,1 @@
-rm -rf build obj MakeFile WrapperModule.make
+rm -rf build obj Makefile WrapperModule.make

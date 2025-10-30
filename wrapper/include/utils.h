@@ -3,12 +3,20 @@
 #include "nlohmann/json.hpp"
 #include <cassert>
 #include <cstdint>
-#include <ffi/ffi.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+
+
+#ifdef __APPLE__
+#include <ffi/ffi.h>
+#else
+#include <ffi.h> // Linux is required if not MACOS (Windows does not have standard FFI library)
+#endif
+
+
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
