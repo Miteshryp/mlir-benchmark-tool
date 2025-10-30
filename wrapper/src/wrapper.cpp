@@ -89,7 +89,7 @@ int main(int argc, char **args) {
 
   std::string outputFolderPath = program.get<std::string>("--output-dir");
 
-  unsigned int sample_run_count = program.get<unsigned int>("--sample-count");
+  int sample_run_count = program.get<int>("--sample-count");
   std::string compiler_path = program.get<std::string>("--cc");
   std::string model_file = program.get<std::string>("model-file");
 
