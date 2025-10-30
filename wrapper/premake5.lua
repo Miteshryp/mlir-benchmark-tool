@@ -49,13 +49,12 @@ project "ext_build"
     local build_cmds = {}
     for _, libname in ipairs(ext_libs) do
         local src_dir = path.join(ext_root, libname)
-        local build_dir = path.join("build", "ext", libname)
+        local build_dir = "." -- path.join("build", "ext", libname)
 
         table.insert(build_cmds, "echo Building external lib: " .. libname)
         table.insert(build_cmds, "cmake -S " .. src_dir .. " -B " .. build_dir .. " -DCMAKE_BUILD_TYPE=%{cfg.buildcfg}")
-        table.insert(build_cmds, "cmake --build " .. build_dir .. " --config %{cfg.buildcfg}")
-        table.insert(build_cmds, "mkdir -p " .. lib_dir)
-        table.insert(build_cmds, "find " .. build_dir .. " -name '*.so' -exec cp {} " .. lib_dir .. " \\;")
+        table.insert(build_cmds, "cmake --build " .. build_dir .. " --config %{cfg.buildcfg} " .. " -j" .. capture_cmd("nproc") )
+        table.insert(build_cmds, "mkdir -p " .. lib_dir .. " && find " .. build_dir .. " -name '*.a' | xargs -I{} cp {} " .. lib_dir)
     end
 
     buildcommands(build_cmds)
@@ -78,7 +77,7 @@ project "WrapperModule"
 
     -- This was for MacOS, but since perf is not supported here, this is meaningless 
    -- linkoptions {  "-framework CoreFoundation", "-Wl,-rpath," .. python_lib_path }
-   linkoptions { "-Wl,-rpath," .. python_lib_path }
+   linkoptions { "-Wl,-rpath," .. python_lib_path, "-lperf-cpp" }
 
 
    files { "include/**.h", "src/**.cpp" }
