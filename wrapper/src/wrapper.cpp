@@ -10,8 +10,8 @@
 #include <initializer_list>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include <numpy/arrayobject.h>
-#include <numpy/ndarraytypes.h>
+// #include <numpy/arrayobject.h>
+// #include <numpy/ndarraytypes.h>
 #include <sstream>
 #include <string>
 
@@ -84,8 +84,7 @@ int main(int argc, char **args) {
   std::string buildPath = program.get<std::string>("--build-path");
   std::vector<std::string> perf_metrics =
       program.get<std::vector<std::string>>("--sample-metrics");
-  // std::string pipelineJsonPath = program.get<std::string>("--pipeline");
-  std::string pipelineJsonPath = "pipeline.json";
+  std::string pipelineJsonPath = program.get<std::string>("--pipeline");
 
   std::string outputFolderPath = program.get<std::string>("--output-dir");
 
@@ -158,13 +157,93 @@ int main(int argc, char **args) {
       //     CommandManager::compile_llvm_dialect(llvm_dialect_filepath);
 
       std::cout << "Starting Execution: \n";
-      std::vector<std::map<std::string, double>> time_metrics =
+      std::vector<std::map<std::string, double>> results =
           CommandManager::execute_with_parameters(ll_object, output_json);
 
-      auto aggregate_metrics = [&]() -> std::vector<float> {
-        for (auto &run_metrics : time_metrics) {
+      // Each run
+
+      std::cout << std::left << std::setw(6) << "Run";
+      for (const auto &e : perf_metrics)
+        std::cout << std::setw(20) << e;
+      std::cout << "\n";
+
+      for (size_t i = 0; i < results.size(); ++i) {
+        std::cout << std::left << std::setw(6) << (i + 1);
+        for (const auto &e : perf_metrics) {
+          double val = results[i].count(e) ? results[i].at(e) : 0.0;
+          std::cout << std::setw(20) << val;
         }
-      };
+        std::cout << "\n";
+      }
+
+      // --- Compute and print averages ---
+      std::cout << std::string(6 + 20 * perf_metrics.size(), '-') << "\n";
+      std::cout << std::left << std::setw(6) << "Avg";
+
+      std::map<std::string, double> sums;
+      for (const auto &r : results)
+        for (const auto &kv : r)
+          sums[kv.first] += kv.second;
+
+      for (const auto &e : perf_metrics)
+        std::cout << std::setw(20) << (sums[e] / sample_run_count);
+      std::cout << "\n";
+
+      // --- Write results to CSV ---
+      fs::path csvOutputPath = fs::path(outputFolderPath)
+                                   .append("timings")
+                                   .append(op_type)
+                                   .append(fs::path(mlirFilePath)
+                                               .replace_extension()
+                                               .filename()
+                                               .generic_string())
+                                   .replace_extension(".csv");
+      // Create path if it doesnt exist
+      if (!fs::is_directory(fs::path(csvOutputPath).parent_path())) {
+        fs::create_directories(fs::path(csvOutputPath).parent_path());
+        // std::cout << "Created output directory" << std::endl;
+      }
+
+      // std::cout << "CSV Path: " << csvOutputPath.generic_string() <<
+      // std::endl;
+      std::ofstream csv(csvOutputPath.generic_string());
+      if (!csv.is_open()) {
+        std::cerr << "Error: Could not open " + csvOutputPath.generic_string() +
+                         " for writing.\n";
+        return 1;
+      }
+
+      // Header
+      csv << "Run";
+      for (const auto &e : perf_metrics)
+        csv << "," << e;
+      csv << "\n";
+
+      // Data rows
+      for (size_t i = 0; i < results.size(); ++i) {
+        csv << (i + 1);
+        for (const auto &e : perf_metrics) {
+          double val = results[i].count(e) ? results[i].at(e) : 0.0;
+          csv << "," << val;
+        }
+        csv << "\n";
+      }
+
+      // Average row
+      csv << "Average";
+      for (const auto &e : perf_metrics)
+        csv << "," << (sums[e] / sample_run_count);
+      csv << "\n";
+
+      csv.close();
+      std::cout << "\nResults written to " + csvOutputPath.generic_string() +
+                       " ✅\n";
+      std::cout << "\n\n";
+
+      // auto aggregate_metrics = [&]() -> std::vector<float> {
+      //   for (auto &run_metrics : time_metrics) {
+      //   }
+      // };
 
       // mlir_output, mlir_metrics =
       // CommandManager::execute_with_parameters(ll_filepath, json_filename)

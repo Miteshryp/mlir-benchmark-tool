@@ -1,0 +1,60 @@
+{
+  "pass": [
+
+  "canonicalize",
+  "cse",
+
+  "linalg-fuse-elementwise-ops", 
+  "linalg-fold-unit-extent-dims",
+  "canonicalize",
+
+
+  "linalg-generalize-named-ops",
+  "canonicalize",
+
+  "one-shot-bufferize=\"bufferize-function-boundaries function-boundary-type-conversion=identity-layout-map\"",
+  "canonicalize",
+
+  "buffer-deallocation-pipeline",
+  "canonicalize",
+
+  "convert-linalg-to-loops",
+  "canonicalize",
+  "cse",
+
+
+  "loop-invariant-code-motion",
+  "affine-loop-fusion",
+  "affine-loop-tile=\"tile-size=32\"",
+  "canonicalize",
+  "cse",
+
+
+  "scf-for-loop-peeling",
+  "canonicalize",
+
+
+  "convert-scf-to-cf",
+  "canonicalize",
+
+
+  "lower-affine",
+  "normalize-memrefs",
+  "memref-expand",
+  "fold-memref-alias-ops",
+  "canonicalize",
+
+
+  "expand-strided-metadata",
+  "lower-affine",
+  "canonicalize",
+
+
+  "finalize-memref-to-llvm",
+  "convert-arith-to-llvm",
+  "convert-cf-to-llvm",
+  "convert-func-to-llvm",
+  "reconcile-unrealized-casts",
+  "canonicalize"
+  ]
+}

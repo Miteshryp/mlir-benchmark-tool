@@ -214,11 +214,12 @@ void CommandManager::isolate_torch_kernels(const std::string &filepath) {
       model_filepath.generic_string() + " > " +
       CommandManager::outputFolder.generic_string() + "/model_lower.log";
 
-  std::cout << "Executing command: " << model_isolation_command.c_str()
-            << std::endl;
+  // std::cout << "Executing command: " << model_isolation_command.c_str()
+  //           << std::endl;
+  std::cout << "Starting Operator Isolation\n";
   // Create model lowerings
   CommandManager::exec(model_isolation_command.c_str());
-  std::cout << "Successfully isolated torch operators\n";
+  // std::cout << "Successfully isolated torch operators\n";
 }
 
 std::vector<std::string> CommandManager::get_operation_types() {
@@ -229,17 +230,14 @@ std::vector<std::string> CommandManager::get_operation_types() {
     return std::vector<std::string>();
   }
 
-  std::cout << "Path for lowering: "
-            << CommandManager::loweringFolder.generic_string() << '\n';
   std::string list_command =
       "ls -d " + CommandManager::loweringFolder.generic_string() + "/*/";
-  std::cout << "List command: " << list_command << std::endl;
+
   std::vector<std::string> returnedDirPaths =
       CommandManager::get_cmd_output(list_command, '\n');
 
   std::vector<std::string> opNames;
   for (std::string s : returnedDirPaths) {
-    std::cout << "We have it here: " << s << std::endl;
     opNames.push_back(fs::path(s).parent_path().filename().generic_string());
   }
 
@@ -263,6 +261,7 @@ fs::path CommandManager::lower_to_llvm_dialect(const fs::path &mlirFilePath) {
       CommandManager::torch_opt_exec.generic_string() + " \
   -pass-pipeline=\"builtin.module(torch-backend-to-linalg-on-tensors-backend-pipeline)\" " +
       mlirFilePath.generic_string() + " > " + linalg_path.c_str();
+
   CommandManager::exec(linalg_lowering_cmd.c_str());
 
   std::string pass_seq = CommandManager::extract_pipeline();
@@ -272,31 +271,12 @@ fs::path CommandManager::lower_to_llvm_dialect(const fs::path &mlirFilePath) {
   fs::path llvm_mlir_filepath = mlirFilePath.parent_path().append(
       mlirFilePath.filename().replace_extension(".llvm.mlir").c_str());
 
-  std::cout << "Extracted pipeline: " << pass_seq << std::endl;
-
-  // std::string llvm_lowering_cmd =
-  //     CommandManager::mlir_opt_exec.generic_string() + " " +
-  //     linalg_path.c_str() + " \
-  //           --canonicalize \
-  //           --cse \
-  //           --allow-unregistered-dialect \
-  //           --one-shot-bufferize=\"bufferize-function-boundaries\" \
-  //           --convert-linalg-to-loops \
-  //           --convert-scf-to-cf \
-  //           --lower-affine \
-  //           --expand-strided-metadata \
-  //           --finalize-memref-to-llvm \
-  //           --convert-arith-to-llvm \
-  //           --convert-func-to-llvm \
-  //           --convert-cf-to-llvm \
-  //           --reconcile-unrealized-casts \
-  //       -o " +
-  //     llvm_mlir_filepath.c_str();
-
   // Create .ll file using supplied pass pipeline
   std::string llvm_lowering_cmd =
       CommandManager::mlir_opt_exec.generic_string() + " " +
       linalg_path.c_str() + pass_seq + " -o " + llvm_mlir_filepath.c_str();
+
+  std::cout << "Lowering command: " << llvm_lowering_cmd.c_str() << std::endl;
 
   CommandManager::get_cmd_output(llvm_lowering_cmd, '\0');
   return llvm_mlir_filepath;
@@ -502,7 +482,6 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
   int llvm_argument_count = 0; // Calculate the total argument count here itself
   std::ofstream data_output_filestream(ll_object_filepath.generic_string() +
                                        ".output");
-  std::cout << "File opened\n";
 
   // Storing tensor arguments as MemRef argument structures
   std::vector<MemRefArg *> argument_data;
@@ -528,8 +507,6 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
     argument_data.push_back(arg);
 
     // @DEBUG: Logging results
-    // std::cout << "Start\n";
-
     if (CommandManager::enableRunLogs) {
       data_output_filestream << "Input " << log_counter++ << ": [" << "\n";
       for (int k = 0; k < elem_count; k++) {
@@ -549,7 +526,7 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
       CommandManager::compiler + " \
       --std=c++20 \
       -fPIC \
-      -shared \
+      -shared -Wno-everything -Woverride-module \
       -o " +
       output_filepath.generic_string() + " -Wl,-rpath," +
       CommandManager::llvm_lib_path.generic_string() + " -L" +
