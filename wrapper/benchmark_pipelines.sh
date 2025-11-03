@@ -9,7 +9,7 @@ make
 
 # Run baseline
 sudo ./build/Debug/WrapperModule \
-  --build-path="/data/anubhav/torch-mlir/build" \
+  --build-path="../torch-mlir/build" \
   --output-dir="$(pwd)/baseline_output" \
   --cc="/usr/bin/clang++" \
   --pipeline="$(pwd)/baseline_pipeline.json" \
@@ -19,7 +19,7 @@ alexnet_torch.mlir
 
 # Run O2
 sudo ./build/Debug/WrapperModule \
-  --build-path="/data/anubhav/torch-mlir/build" \
+  --build-path="../torch-mlir/build" \
   --output-dir="$(pwd)/o2_output" \
   --cc="/usr/bin/clang++" \
   --pipeline="$(pwd)/o2_pipeline.json" \
