@@ -1,0 +1,2 @@
+alexnet_torch.mlir filter=lfs diff=lfs merge=lfs -text
+alexnet_linalg_generics.mlir filter=lfs diff=lfs merge=lfs -text
