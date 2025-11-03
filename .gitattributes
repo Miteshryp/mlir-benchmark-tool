@@ -1,2 +1,4 @@
 wrapper/resnet_torch_dialect.mlir filter=lfs diff=lfs merge=lfs -text
 *.mlir filter=lfs diff=lfs merge=lfs -text
+wrapper/alexnet_linalg_generics.mlir filter=lfs diff=lfs merge=lfs -text
+wrapper/alexnet_torch.mlir filter=lfs diff=lfs merge=lfs -text
