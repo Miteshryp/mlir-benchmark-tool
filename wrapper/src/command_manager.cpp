@@ -479,7 +479,6 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
       kernel_function_json["returns"].template get<std::vector<json>>();
 
   // Prepare appropriate MemRef structures
-  int llvm_argument_count = 0; // Calculate the total argument count here itself
   std::ofstream data_output_filestream(ll_object_filepath.generic_string() +
                                        ".output");
 
@@ -497,6 +496,8 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
 
     // Generate random normalised data
     DataFormatInfo dataInfo;
+    // DataFormatInfo dataInfo(
+    // DataProfile::TEST); // This is done for demonstration purposes
     auto elem_count = arg->get_tensor_elem_count();
     dataInfo.setElemCount(elem_count);
 
@@ -515,8 +516,6 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
       data_output_filestream << "]\n\n";
       data_output_filestream.flush();
       // std::cout << "End\n";
-
-      llvm_argument_count += 3 + arg->m_tensor_rank * 2;
     }
   }
 
@@ -628,10 +627,10 @@ CommandManager::execute_with_parameters(const fs::path &ll_object_filepath,
   // ffi_call(&calling_interface, FFI_FN(kHandle), return_arg.getData(),
   //          func_arg_data.data());
 
-  // std::cout << "Printer: \n";
-  // for (int i = 0; i < func_arg_data.size(); i++) {
-  //   std::cout << *((uint64_t *)func_arg_data[i]) << std::endl;
-  // }
+  std::cout << "Printer: \n";
+  for (int i = 0; i < func_arg_data.size(); i++) {
+    std::cout << *((uint64_t *)func_arg_data[i]) << std::endl;
+  }
 
   // void *returned_ptr = malloc(ret_arg_type->size);
   void *returned_ptr;

@@ -3,7 +3,7 @@
 #include <cmath>
 #include <cstdint>
 
-enum DataProfile { RANDOM, RANDOM_NORM, ZEROS, SPARSE };
+enum DataProfile { TEST, RANDOM, RANDOM_NORM, ZEROS, SPARSE };
 enum DataOrder { NCHW, NCWH };
 
 /*
@@ -70,6 +70,7 @@ public:
 
 class TensorFuzzer {
   static float *generate_random_data(DataFormatInfo info);
+  static float *generate_test_data(DataFormatInfo info);
   static float *generate_random_data_norm(DataFormatInfo info);
   static float *generate_zero_data(DataFormatInfo info);
   // static float *generate_sparse_data(const uint64_t &elem_count,

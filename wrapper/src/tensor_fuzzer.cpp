@@ -68,7 +68,7 @@ float *TensorFuzzer::generate_random_data(DataFormatInfo info) {
   applyTimeSeed(); // Initialises the Psuedo Random Generator
 
   for (int i = 0; i < elem_count; i++) {
-    float norm_scale = std::rand() / RAND_MAX;
+    float norm_scale = (float)std::rand() / RAND_MAX;
     float value = range_min + (range_length * norm_scale);
     array[i] = value;
   }
@@ -85,9 +85,20 @@ float *TensorFuzzer::generate_random_data_norm(DataFormatInfo info) {
   applyTimeSeed(); // Initialises the Psuedo Random Generator
 
   for (int i = 0; i < elem_count; i++) {
-    // float norm_scale = (float)std::rand() / RAND_MAX;
+    float norm_scale = (float)std::rand() / RAND_MAX;
+    array[i] = norm_scale;
+  }
+  return array;
+}
 
-    // TODO: Change this back to random data after testing
+float *TensorFuzzer::generate_test_data(DataFormatInfo info) {
+  uint64_t elem_count = info.m_elem_count;
+
+  float *array = (float *)malloc(elem_count * sizeof(float));
+  applyTimeSeed(); // Initialises the Psuedo Random Generator
+
+  for (int i = 0; i < elem_count; i++) {
+
     float norm_scale = 2;
     // std::cout << norm_scale << " ";
     array[i] = norm_scale;
@@ -103,6 +114,8 @@ float *TensorFuzzer::generate_random_data_norm(DataFormatInfo info) {
  */
 float *TensorFuzzer::generate_data(DataFormatInfo dataInfo) {
   switch (dataInfo.m_profile) {
+  case TEST:
+    return generate_random_data(dataInfo);
   case RANDOM:
     return generate_random_data(dataInfo);
   case RANDOM_NORM:
